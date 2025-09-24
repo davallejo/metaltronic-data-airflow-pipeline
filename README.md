@@ -391,18 +391,8 @@ pytest tests/
 docker-compose exec postgres psql -U metaltronic_user -d metaltronic_db -f sql/test_queries.sql
 ```
 
-## 📜 Licencia y Contacto
-
-### Empresa
-**Metaltronic S.A.**
-- 📍 Ambato, Tungurahua, Ecuador
-- 📧 info@metaltronic.com
-- 🌐 www.metaltronic.com.ec
-
 ### Equipo de Desarrollo
-- **Data Engineering Team**
-- 📧 data@metaltronic.com
-- 🐛 Issues: [GitHub Issues](https://github.com/tu-usuario/metaltronic-data-pipeline/issues)
+- **Diego Vallejo**
 
 ### Licencia
 Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detalles.
@@ -411,4 +401,4 @@ Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detall
 
 **⚡ ¡Pipeline listo para procesar datos metalmecánicos ecuatorianos!**
 
-*Desarrollado con ❤️ por el equipo de Ingeniería de Datos de Metaltronic S.A.*
+*Desarrollado con ❤️ por el equipo de Ingeniería de Datos*
