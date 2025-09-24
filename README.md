@@ -10,7 +10,7 @@
 
 ## 📋 Descripción del Proyecto
 
-Sistema ETL (Extract, Transform, Load) desarrollado para **Metaltronic S.A.**, empresa metalmecánica ubicada en Ambato, Tungurahua, Ecuador. El pipeline procesa diariamente datos de ventas, inventario y logs operacionales para generar insights de negocio.
+Sistema ETL (Extract, Transform, Load) desarrollado para **Metaltronic S.A.**, empresa metalmecánica ubicada en Ecuador. El pipeline procesa diariamente datos de ventas, inventario y logs operacionales para generar insights de negocio.
 
 ### 🎯 Objetivo
 Automatizar el procesamiento de datos transaccionales y generar reportes analíticos que permitan:
@@ -103,7 +103,7 @@ metaltronic-data-pipeline/
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/tu-usuario/metaltronic-data-pipeline.git
+git clone https://github.com/davallejo/metaltronic-data-airflow-pipeline.git
 cd metaltronic-data-pipeline
 ```
 
@@ -125,6 +125,8 @@ docker-compose up -d
 # Verificar que todos los servicios estén corriendo
 docker-compose ps
 ```
+<img width="1346" height="183" alt="image" src="https://github.com/user-attachments/assets/453db7c1-bd65-48a4-bf3c-ce98b208a356" />
+
 
 ### 4. Verificar la Instalación
 ```bash
@@ -137,13 +139,22 @@ docker-compose exec postgres psql -U metaltronic_user -d metaltronic_db -c "\dt 
 # Verificar conexión a MongoDB
 docker-compose exec mongodb mongo -u mongo_user -p mongo_pass --authenticationDatabase admin
 ```
+<img width="1360" height="245" alt="image" src="https://github.com/user-attachments/assets/951db8f5-9296-47ac-bfb5-a7d7e81d98ad" />
+
+<img width="1360" height="182" alt="image" src="https://github.com/user-attachments/assets/00004c22-b564-4a15-a7d2-4b97e160d7fc" />
+
+<img width="1360" height="158" alt="image" src="https://github.com/user-attachments/assets/41e3c634-9f39-4c5d-9f04-4aa142238b5d" />
+
 
 ## 🎮 Uso del Sistema
 
 ### Acceso a la Interfaz Web de Airflow
-1. Abrir navegador en: http://localhost:8080
+1. Abrir navegador en: http://localhost:8081
 2. **Usuario**: `admin`
 3. **Contraseña**: `admin123`
+
+<img width="1437" height="416" alt="image" src="https://github.com/user-attachments/assets/9d743c29-d120-4f9d-8dc7-9eae721588dc" />
+
 
 ### Ejecutar el Pipeline ETL
 
@@ -151,6 +162,9 @@ docker-compose exec mongodb mongo -u mongo_user -p mongo_pass --authenticationDa
 1. En la interfaz de Airflow, buscar el DAG: `metaltronic_etl_pipeline`
 2. Activar el DAG con el toggle
 3. Hacer clic en "Trigger DAG" para ejecutar manualmente
+
+<img width="1450" height="468" alt="image" src="https://github.com/user-attachments/assets/8c142522-24d1-4466-af62-08a96ef13733" />
+
 
 #### Ejecución Programada
 - El pipeline se ejecuta automáticamente todos los días a las 6:00 AM
@@ -161,9 +175,14 @@ docker-compose exec mongodb mongo -u mongo_user -p mongo_pass --authenticationDa
 # Ver logs del pipeline
 docker-compose logs -f airflow-scheduler
 
-# Ver logs específicos de una tarea
-docker-compose exec airflow-webserver airflow tasks log metaltronic_etl_pipeline extract_data 2024-01-15
+# Ver logs específicos
+docker-compose exec airflow-webserver airflow dags list-runs -d metaltronic_etl_pipeline
 ```
+<img width="1175" height="265" alt="image" src="https://github.com/user-attachments/assets/95277ff4-f413-45e0-a07b-d195c7523947" />
+
+<img width="1371" height="161" alt="image" src="https://github.com/user-attachments/assets/391fe451-10b8-4418-af10-87907ee8fe7b" />
+
+
 
 ## 🧪 Pruebas y Validación
 
@@ -173,19 +192,30 @@ docker-compose exec airflow-webserver airflow tasks log metaltronic_etl_pipeline
 docker-compose exec postgres psql -U metaltronic_user -d metaltronic_db
 
 -- Verificar datos de ventas
-SELECT COUNT(*) FROM ventas.transacciones;
-SELECT COUNT(*) FROM ventas.detalle_ventas;
-SELECT COUNT(*) FROM inventario.productos;
+SELECT * FROM ventas.transacciones;
+SELECT * FROM ventas.detalle_ventas;
+SELECT * FROM inventario.productos;
 ```
+<img width="1643" height="265" alt="image" src="https://github.com/user-attachments/assets/817b42d2-f4ea-4b07-a9e2-5b64ddb74fd3" />
+
+<img width="959" height="289" alt="image" src="https://github.com/user-attachments/assets/dbcb5231-c218-4a55-a228-3e5e5fdc088b" />
+
+<img width="1748" height="316" alt="image" src="https://github.com/user-attachments/assets/5989cd1a-48c1-4af0-acc7-4dbda8781cef" />
+
 
 ```javascript
 // Conectar a MongoDB
 docker-compose exec mongodb mongo -u mongo_user -p mongo_pass --authenticationDatabase admin
 
 use metaltronic_mongo
-db.logs_ventas.count()
+db.logs_ventas.find().limit(5).pretty()
 db.sesiones_usuario.count()
 ```
+<img width="1135" height="139" alt="image" src="https://github.com/user-attachments/assets/0ba293b0-7818-4af3-b1fb-7f4ab34f500b" />
+
+<img width="691" height="599" alt="image" src="https://github.com/user-attachments/assets/407d8b06-ee97-4e32-a66d-7d82ea63271e" />
+
+<img width="725" height="92" alt="image" src="https://github.com/user-attachments/assets/32a97132-6363-4e2f-9bf4-4a0d31a4f829" />
 
 ### 2. Ejecutar Pipeline Completo
 ```bash
@@ -193,8 +223,19 @@ db.sesiones_usuario.count()
 docker-compose exec airflow-webserver airflow dags trigger metaltronic_etl_pipeline
 
 # Monitorear estado
-docker-compose exec airflow-webserver airflow dags state metaltronic_etl_pipeline 2024-01-15
+docker-compose exec airflow-webserver \
+  airflow dags list-runs -d metaltronic_etl_pipeline --no-backfill | grep success
+
+# Ver los estados de las tasks de un DAG Run usando run_id
+docker-compose exec airflow-webserver \
+  airflow tasks states-for-dag-run metaltronic_etl_pipeline scheduled__2024-01-04T06:00:00+00:00
 ```
+<img width="882" height="291" alt="image" src="https://github.com/user-attachments/assets/bc925ae6-903f-4065-af26-407d0c5ea66a" />
+
+<img width="1135" height="485" alt="image" src="https://github.com/user-attachments/assets/78898937-5ed6-41c9-b912-0ba6815990fe" />
+
+<img width="1386" height="389" alt="image" src="https://github.com/user-attachments/assets/5dacb0fb-81a1-4429-883d-31083f4a401c" />
+
 
 ### 3. Validar Resultados
 ```sql
