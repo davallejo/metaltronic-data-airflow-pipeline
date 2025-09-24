@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: metaltronic_user
+      POSTGRES_PASSWORD: metaltronic_pass
+      POSTGRES_DB: metaltronic_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - metaltronic_network
+
+  # Base de datos MongoDB
+  mongodb:
+    image: mongo:5.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_user
+      MONGO_INITDB_ROOT_PASSWORD: mongo_pass
+      MONGO_INITDB_DATABASE: metaltronic_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./sql/init_mongo.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - metaltronic_network
+
+  # Redis para Airflow
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - metaltronic_network
+
+  # Apache Airflow
+  airflow-webserver:
+    build: .
+    command: webserver
+    ports:
+      - "8081:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://metaltronic_user:metaltronic_pass@postgres:5432/metaltronic_db
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=true
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - AIRFLOW__WEBSERVER__SECRET_KEY=metaltronic_secret_key
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./config:/opt/airflow/config
+      - ./data:/opt/airflow/data
+      - airflow_logs:/opt/airflow/logs
+    depends_on:
+      - postgres
+      - mongodb
+      - redis
+    networks:
+      - metaltronic_network
+
+  # Airflow Scheduler
+  airflow-scheduler:
+    build: .
+    command: scheduler
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://metaltronic_user:metaltronic_pass@postgres:5432/metaltronic_db
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./config:/opt/airflow/config
+      - ./data:/opt/airflow/data
+      - airflow_logs:/opt/airflow/logs
+    depends_on:
+      - postgres
+      - mongodb
+      - redis
+    networks:
+      - metaltronic_network
+
+volumes:
+  postgres_data:
+  mongo_data:
+  airflow_logs:
+
+networks:
+  metaltronic_network:
+    driver: bridge
